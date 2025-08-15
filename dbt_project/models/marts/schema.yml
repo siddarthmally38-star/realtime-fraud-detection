@@ -1,0 +1,28 @@
+version: 2
+models:
+  - name: fct_fraud_daily
+    description: Daily fraud metrics and rates
+    columns:
+      - name: txn_date
+        tests: [not_null, unique]
+      - name: fraud_rate_pct
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100
+
+  - name: fct_fraud_by_category
+    description: Fraud metrics broken down by merchant category
+    columns:
+      - name: category
+        tests: [not_null, unique]
+
+  - name: dim_fraud_customers
+    description: Customer-level fraud risk profiles
+    columns:
+      - name: customer_id
+        tests: [not_null, unique]
+      - name: risk_status
+        tests:
+          - accepted_values:
+              values: ['blocked', 'high_risk', 'watch', 'clean']
