@@ -1,0 +1,93 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "panels": [
+    {
+      "title": "Fraud Rate Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "rawSql": "SELECT txn_date as time, fraud_rate_pct FROM fct_fraud_daily ORDER BY txn_date",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "percent",
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 3 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Transaction Volume",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "rawSql": "SELECT sum(total_transactions) as value FROM fct_fraud_daily WHERE txn_date = CURRENT_DATE",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "title": "Fraud Count Today",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "targets": [
+        {
+          "rawSql": "SELECT sum(fraud_count) as value FROM fct_fraud_daily WHERE txn_date = CURRENT_DATE",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": { "defaults": { "color": { "fixedColor": "red", "mode": "fixed" } } }
+    },
+    {
+      "title": "Fraud Amount Today",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "targets": [
+        {
+          "rawSql": "SELECT sum(fraud_amount) as value FROM fct_fraud_daily WHERE txn_date = CURRENT_DATE",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "currencyUSD" } }
+    },
+    {
+      "title": "Fraud by Category",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "rawSql": "SELECT category, fraud_rate_pct, fraud_count FROM fct_fraud_by_category ORDER BY fraud_rate_pct DESC",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "title": "High-Risk Customers",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "rawSql": "SELECT customer_id, risk_status, fraud_count, fraud_amount, avg_fraud_score FROM dim_fraud_customers WHERE risk_status IN ('blocked', 'high_risk') ORDER BY fraud_count DESC LIMIT 20",
+          "format": "table"
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["fraud", "realtime"],
+  "time": { "from": "now-7d", "to": "now" },
+  "title": "Fraud Detection Pipeline - Overview",
+  "uid": "fraud-overview"
+}
